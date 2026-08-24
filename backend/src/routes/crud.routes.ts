@@ -13,10 +13,11 @@ export const registerCrudRoutes = <T extends { id: string }>(
   label: string,
   repository: BaseRepository<T>,
   schema: ZodSchema,
+  updateSchema: ZodSchema = (schema as never as { partial: () => ZodSchema }).partial(),
 ) => {
   const controller = new CrudController(new BaseService(repository, label), label);
   app.get(prefix, { preHandler: [authenticate, validate(paginationSchema, "query")] }, controller.list);
   app.post(prefix, { preHandler: [authenticate, authorize("Administrator"), validate(schema)] }, controller.create);
-  app.put(`${prefix}/:id`, { preHandler: [authenticate, authorize("Administrator"), validate(uuidParamSchema, "params"), validate((schema as never as { partial: () => ZodSchema }).partial())] }, controller.update);
+  app.put(`${prefix}/:id`, { preHandler: [authenticate, authorize("Administrator"), validate(uuidParamSchema, "params"), validate(updateSchema)] }, controller.update);
   app.delete(`${prefix}/:id`, { preHandler: [authenticate, authorize("Administrator"), validate(uuidParamSchema, "params")] }, controller.delete);
 };

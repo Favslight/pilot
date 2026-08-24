@@ -6,7 +6,7 @@ import { validate } from "../middlewares/validate";
 import { BaseRepository } from "../repositories/base.repository";
 import { BaseService } from "../services/base.service";
 import { uuidParamSchema, paginationSchema } from "../validators/common";
-import { assignPermissionsSchema, roleSchema, schoolInformationSchema, termSchema } from "../validators/foundation.validator";
+import { assignPermissionsSchema, roleSchema, schoolInformationSchema, termSchema, updateTermSchema } from "../validators/foundation.validator";
 import { registerCrudRoutes } from "./crud.routes";
 
 type Row = { id: string };
@@ -23,7 +23,7 @@ export const masterRoutes = async (app: FastifyInstance) => {
   app.put("/api/roles/:id/permissions", { preHandler: [authenticate, authorize("Administrator"), validate(uuidParamSchema, "params"), validate(assignPermissionsSchema)] }, controller.assignPermissions);
   app.post("/api/roles/:id/duplicate", { preHandler: [authenticate, authorize("Administrator"), validate(uuidParamSchema, "params")] }, controller.duplicateRole);
   app.patch("/api/sessions/:id/current", { preHandler: [authenticate, authorize("Administrator"), validate(uuidParamSchema, "params")] }, controller.setCurrentSession);
-  registerCrudRoutes<Row>(app, "/api/terms", "Term", new BaseRepository("terms", ["term_name", "status"], ["session_id", "term_name", "display_order", "start_date", "end_date", "status"]), termSchema);
+  registerCrudRoutes<Row>(app, "/api/terms", "Term", new BaseRepository("terms", ["term_name", "status"], ["session_id", "term_name", "display_order", "start_date", "end_date", "status"]), termSchema, updateTermSchema);
   app.patch("/api/terms/:id/active", { preHandler: [authenticate, authorize("Administrator"), validate(uuidParamSchema, "params")] }, controller.setActiveTerm);
 
   app.get("/api/school-information", { preHandler: [authenticate] }, controller.schoolInfo);

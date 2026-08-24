@@ -25,14 +25,21 @@ export const classSchema = z.object({
 
 export const armSchema = z.object({ name: z.string().trim().min(1).max(40) });
 
-export const termSchema = z.object({
+const termBaseSchema = z.object({
   session_id: z.string().uuid(),
   term_name: z.enum(["First Term", "Second Term", "Third Term"]),
   display_order: z.number().int().min(1).max(3),
   start_date: z.string().date(),
   end_date: z.string().date(),
   status: z.enum(["active", "inactive", "closed", "archived"]).default("inactive"),
-}).refine((value) => value.end_date >= value.start_date, { message: "End date must be after start date", path: ["end_date"] });
+});
+
+const termDateRangeRefinement = (value: { start_date?: string; end_date?: string }) =>
+  !value.start_date || !value.end_date || value.end_date >= value.start_date;
+
+export const termSchema = termBaseSchema.refine(termDateRangeRefinement, { message: "End date must be after start date", path: ["end_date"] });
+
+export const updateTermSchema = termBaseSchema.partial().refine(termDateRangeRefinement, { message: "End date must be after start date", path: ["end_date"] });
 
 export const schoolInformationSchema = z.object({
   school_name: z.string().trim().min(2).max(180),
